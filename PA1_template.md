@@ -5,13 +5,15 @@ Author: Kunal Vaidya
 ## Before Imputing the Data
 
 **Reading in the data for  steps**
-```{r,echo=TRUE}
+
+```r
 step.data <- read.csv('activity.csv')
 ```
 
 **Plotting Histogram of total number of steps taken per day**
 
-```{r,echo=TRUE}
+
+```r
 step.na.data<-step.data[!is.na(step.data$steps),]
 hist.data <- with(step.na.data,tapply(steps,date,sum))
 hist.data <- data.frame(hist.data)
@@ -21,18 +23,37 @@ hist.dataframe <- data.frame(steps.each.day=hist.data$hist.data,date=dates)
 ggplot(hist.dataframe,aes(x=steps.each.day)) + geom_histogram() + ggtitle("Histogram before Imputing Data")
 ```
 
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png)
+
 **Calculating mean and median of total number of steps each day**
 
-```{r,echo=TRUE}
+
+```r
 mean.step <- mean(hist.dataframe$steps.each.day,na.rm=TRUE)
 print(paste0("Mean of total number of steps is : ",mean.step))
+```
+
+```
+## [1] "Mean of total number of steps is : 10766.1886792453"
+```
+
+```r
 median.step <- median(hist.dataframe$steps.each.day,na.rm = TRUE)
 print(paste0("Median of total number of steps is :",median.step))
 ```
 
+```
+## [1] "Median of total number of steps is :10765"
+```
+
 **Time Series Plot for 5-minute interval (x-axis) vs average number of over all days (y-axis)**
 
-```{r,echo=TRUE}
+
+```r
 step.na.data$factor.interval <- as.factor(step.na.data$interval)
 
 interval.data <- with(step.na.data,tapply(steps,factor.interval,mean))
@@ -42,19 +63,31 @@ library(ggplot2)
 ggplot(interval.data.frame,aes(x=interval,y=average.steps)) + geom_line() +ggtitle("TIme Series Plot for 5 minute interval")
 ```
 
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png)
+
 **Interval Containing Maximum number of steps**
 
-```{r,echo=TRUE}
+
+```r
 max.index <-which.max(interval.data.frame$average.steps)
 max.interval <- interval.data.frame[max.index,1]
 print(paste0("Interval Containing Maximum Number os Steps :",max.interval))
 ```
 
+```
+## [1] "Interval Containing Maximum Number os Steps :835"
+```
+
 **Number of Rows with NA's**
 
-```{r,echo=TRUE}
+
+```r
 na.true <- table(is.na(step.data$steps))[2]
 print(paste0("Number of Rows with NA's : ",na.true))
+```
+
+```
+## [1] "Number of Rows with NA's : 2304"
 ```
 
 ## Imputing the Data
@@ -67,7 +100,8 @@ Fill the NA's with the average number of steps for the interval who's value is m
 
 Looping over all indexes where there is NA and filling value according to 5 minute interval
 
-```{r,echo=TRUE}
+
+```r
 na.indexes <- which(is.na(step.data$steps))
 for (i in na.indexes){
   step.data[i,]$steps=interval.data.frame[interval.data.frame$interval==step.data[i,]$interval,]$average.steps
@@ -76,8 +110,8 @@ for (i in na.indexes){
 ## After Imputing the Data
 
 **Plotting Histogram For New Dataset**
-```{r,echo=TRUE,fig.width=12}
 
+```r
 hist.data.new <- with(step.data,tapply(steps,date,sum))
 hist.data.new <- data.frame(hist.data.new)
 library(ggplot2)
@@ -90,12 +124,31 @@ library(ggpubr)
 ggarrange(plot1,plot2,ncol=2,nrow=1,labels=c("After Imputing Data","Before Imputing Data"))
 ```
 
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png)
+
 **Mean and Median For new Dataset**
-```{r,echo=TRUE}
+
+```r
 mean.step.new <- mean(hist.dataframe.new$steps.each.day)
 print(paste0("Mean of total number of steps is : ",mean.step.new))
+```
+
+```
+## [1] "Mean of total number of steps is : 10766.1886792453"
+```
+
+```r
 median.step.new <- median(hist.dataframe.new$steps.each.day,na.rm = TRUE)
 print(paste0("Median of total number of steps is :",median.step.new))
+```
+
+```
+## [1] "Median of total number of steps is :10766.1886792453"
 ```
 **Impact of imputing missing data**
 
@@ -109,8 +162,8 @@ print(paste0("Median of total number of steps is :",median.step.new))
 
 Making A Panel Plot for average steps during a interval for weekdays and weekends
 
-```{r,echo=TRUE,fig.width=9}
 
+```r
 step.data$factor.interval <- as.factor(step.data$interval)
 step.data$day <- weekdays(as.Date(step.data$date))
 week.days <- grepl("Monday|Tuesday|Wednesday|Thursday",step.data$day)
@@ -138,5 +191,6 @@ total.dataset$weekday <-as.factor(total.dataset$weekday)
 
 library(ggplot2)
 ggplot(data=total.dataset,aes(x=interval,y=average.steps)) + geom_line() + facet_wrap(.~weekday)
-
 ```
+
+![plot of chunk unnamed-chunk-17](figure/unnamed-chunk-17-1.png)
